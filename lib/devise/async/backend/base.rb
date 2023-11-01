@@ -14,7 +14,7 @@ module Devise
         # This method is executed within the scope of the locale of
         # the calling thread.
         def perform(method, resource_class, resource_id, *args)
-          I18n.with_locale locale_from_args(args) do
+          I18n.with_locale locale_from_args(args)&.to_sym do
             resource = resource_class.constantize.to_adapter.get!(resource_id)
             args[-1] = args.last.symbolize_keys if args.last.is_a?(Hash)
             mailer = mailer_class(resource).send(method, resource, *args)

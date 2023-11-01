@@ -31,6 +31,7 @@ module Devise
         # of an email because it is scoped to the current thread. Hence,
         # using asynchronous mechanisms that use another thread to send an
         # email the currently used locale will be gone later.
+
         args = args_with_current_locale(args)
 
         # If the record is dirty we keep pending notifications to be enqueued
@@ -40,7 +41,7 @@ module Devise
         # If the record isn't dirty (aka has already been saved) enqueue right away
         # because the callback has already been triggered.
         else
-          Devise::Async::Worker.enqueue(notification, self.class.name, self.id.to_s, *args)
+          Devise::Async::Worker.enqueue(notification.to_s, self.class.name, self.id.to_s, *args)
         end
       end
 
@@ -49,7 +50,7 @@ module Devise
         devise_pending_notifications.each do |notification, args|
           # Use `id.to_s` to avoid problems with mongoid 2.4.X ids being serialized
           # wrong with YAJL.
-          Devise::Async::Worker.enqueue(notification, self.class.name, self.id.to_s, *args)
+          Devise::Async::Worker.enqueue(notification.to_s, self.class.name, self.id.to_s, *args)
         end
         @devise_pending_notifications = []
       end
@@ -70,7 +71,7 @@ module Devise
       def add_current_locale_to_args(args)
         # Devise expects a hash as the last parameter for Mailer methods.
         opts = args.last.is_a?(Hash) ? args.pop : {}
-        opts['locale'] = I18n.locale
+        opts['locale'] = I18n.locale.to_s
         args.push(opts)
       end
 
